@@ -170,9 +170,6 @@ List of devices attached
 device_id    device
 
 
-Evidence Required:
-
-[INSERT DEVICE CONNECTION]
 
 --------------------------------------------------
 6. APPLICATION DEPLOYMENT
@@ -192,9 +189,7 @@ Verify:
 
 Application visible inside device
 
-Evidence:
 
-[INSERT APP INSTALLATION]
 
 --------------------------------------------------
 7. BURP CONFIGURATION
@@ -220,11 +215,7 @@ Port:
 8080
 
 
-Evidence:
 
-[INSERT BURP DASHBOARD]
-
-[INSERT LISTENER CONFIG]
 
 --------------------------------------------------
 8. TRAFFIC ROUTING
@@ -253,9 +244,7 @@ Burp
  ↓
 Backend
 
-Evidence:
 
-[INSERT DEVICE PROXY]
 
 --------------------------------------------------
 9. MITM VALIDATION
@@ -289,9 +278,7 @@ Request rejected
 
 MitM blocked
 
-Evidence:
 
-[INSERT TLS FAILURE]
 
 --------------------------------------------------
 10. RUNTIME SECURITY
@@ -314,9 +301,7 @@ Purpose:
 
 Prevent analysis environments
 
-Evidence:
 
-[INSERT EMULATOR CHECK]
 
 
 Frida Detection
@@ -325,94 +310,12 @@ Purpose:
 
 Detect instrumentation
 
-Evidence:
 
-[INSERT FRIDA CHECK]
+
+
 
 --------------------------------------------------
-11. EVIDENCE COLLECTION
---------------------------------------------------
-
-Folder 01
-
-      Environment Setup
-      
-      Required:
-      
-      Device
-      
-      ADB
-      
-      Burp
-
-
-Folder 02
-
-      Normal TLS
-      
-      Required:
-      
-      HTTPS flow
-
-
-Folder 03
-
-      MitM Setup
-      
-      Required:
-      
-      Proxy routing
-      
-      Burp config
-
-
-Folder 04
-      
-      Pinning Protection
-      
-      Required:
-      
-      TLS failure
-      
-      Blocked request
-
-
-Folder 05
-
-      Frida
-      
-      Pending
-
-
-Folder 06
-
-      Interception
-      
-      Pending
-
-
-Folder 07
-
-      Packet Capture
-      
-      Wireshark
-
-
-Folder 08
-
-      Defence
-      
-      Runtime checks
-
-
-Folder 09
-
-      Before After
-      
-      Comparison evidence
-
---------------------------------------------------
-12. CURRENT STATUS
+11. CURRENT STATUS
 --------------------------------------------------
 
 Completed
@@ -434,7 +337,7 @@ Completed
       Frida Detection
 
 
-Future WOrk
+Future Work
 
       Dynamic bypass
       
