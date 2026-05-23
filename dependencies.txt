@@ -1,0 +1,9 @@
+// Add this dependency under dependencies block in your app-level build.gradle (.gradle or build.gradle.kts)
+dependencies {
+    // OkHttp Client for secure HTTPS calls and Certificate Pinning support
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // AndroidX dependencies (if missing)
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+}
