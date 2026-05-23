@@ -335,81 +335,81 @@ Evidence:
 
 Folder 01
 
-Environment Setup
-
-Required:
-
-Device
-
-ADB
-
-Burp
+      Environment Setup
+      
+      Required:
+      
+      Device
+      
+      ADB
+      
+      Burp
 
 
 Folder 02
 
-Normal TLS
-
-Required:
-
-HTTPS flow
+      Normal TLS
+      
+      Required:
+      
+      HTTPS flow
 
 
 Folder 03
 
-MitM Setup
-
-Required:
-
-Proxy routing
-
-Burp config
+      MitM Setup
+      
+      Required:
+      
+      Proxy routing
+      
+      Burp config
 
 
 Folder 04
-
-Pinning Protection
-
-Required:
-
-TLS failure
-
-Blocked request
+      
+      Pinning Protection
+      
+      Required:
+      
+      TLS failure
+      
+      Blocked request
 
 
 Folder 05
 
-Frida
-
-Pending
+      Frida
+      
+      Pending
 
 
 Folder 06
 
-Interception
-
-Pending
+      Interception
+      
+      Pending
 
 
 Folder 07
 
-Packet Capture
-
-Wireshark
+      Packet Capture
+      
+      Wireshark
 
 
 Folder 08
 
-Defence
-
-Runtime checks
+      Defence
+      
+      Runtime checks
 
 
 Folder 09
 
-Before After
-
-Comparison evidence
+      Before After
+      
+      Comparison evidence
 
 --------------------------------------------------
 12. CURRENT STATUS
@@ -417,27 +417,27 @@ Comparison evidence
 
 Completed
 
-Android App
+      Android App
+      
+      Burp Setup
+      
+      Routing
+      
+      MitM Attempt
+      
+      TLS Validation
+      
+      Root Detection
+      
+      Emulator Detection
+      
+      Frida Detection
 
-Burp Setup
 
-Routing
+Future WOrk
 
-MitM Attempt
-
-TLS Validation
-
-Root Detection
-
-Emulator Detection
-
-Frida Detection
-
-
-Pending
-
-Dynamic bypass
-
-Successful interception
-
-Backup pins
+      Dynamic bypass
+      
+      Successful interception
+      
+      Backup pins
